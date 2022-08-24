@@ -62,11 +62,11 @@ def add(ctx, username, password, role, **flags):
             # make sure all roles exists
             roles = []
             for role_name in role:
-                this_role = users.find_role(role_name)
-                if not this_role:
-                    raise Exception(f"Role '{role_name}' does not exists.")
+                if this_role := users.find_role(role_name):
+                    roles.append(this_role)
 
-                roles.append(this_role)
+                else:
+                    raise Exception(f"Role '{role_name}' does not exists.")
 
             current_user = users.get_user(username) or users.create_user(
                 username=username

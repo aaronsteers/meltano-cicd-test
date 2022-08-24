@@ -63,8 +63,7 @@ def fetch_urls(
 
     futures = get_futures(urls=urls, headers=headers, timeout=timeout)
     future = asyncio.ensure_future(futures)
-    responses = loop.run_until_complete(future)
-    yield from responses
+    yield from loop.run_until_complete(future)
 
 
 def get_sqlalchemy_col(

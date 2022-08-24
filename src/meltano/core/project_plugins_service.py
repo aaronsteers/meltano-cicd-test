@@ -276,13 +276,14 @@ class ProjectPluginsService:  # noqa: WPS214, WPS230 (too many methods, attribut
         Raises:
             PluginNotFoundError: If no mapper plugin with the specified mapping name is found.
         """
-        found: List[ProjectPlugin] = []
-        for plugin in self.get_plugins_of_type(plugin_type=PluginType.MAPPERS):
-            if plugin.extra_config.get("_mapping_name") == mapping_name:
-                found.append(plugin)
-        if not found:
+        if found := [
+            plugin
+            for plugin in self.get_plugins_of_type(plugin_type=PluginType.MAPPERS)
+            if plugin.extra_config.get("_mapping_name") == mapping_name
+        ]:
+            return found
+        else:
             raise PluginNotFoundError(mapping_name)
-        return found
 
     def get_plugin(self, plugin_ref: PluginRef) -> ProjectPlugin:
         """Get a plugin using its PluginRef.
@@ -538,9 +539,10 @@ class ProjectPluginsService:  # noqa: WPS214, WPS230 (too many methods, attribut
         Returns:
             First available transformer plugin.
         """
-        transformer = next(
-            iter(self.get_plugins_of_type(plugin_type=PluginType.TRANSFORMERS)), None
-        )
-        if not transformer:
+        if transformer := next(
+            iter(self.get_plugins_of_type(plugin_type=PluginType.TRANSFORMERS)),
+            None,
+        ):
+            return transformer
+        else:
             raise PluginNotFoundError("No Plugin of type Transformer found.")
-        return transformer

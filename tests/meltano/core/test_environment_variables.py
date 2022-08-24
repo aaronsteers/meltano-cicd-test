@@ -34,46 +34,40 @@ def _meltanofile_update_dict(
         "executable": "pwd",
     }
     if top_level_plugin_setting:
-        setting.update({"value": "top_level_plugin_setting"})
+        setting["value"] = "top_level_plugin_setting"
     if top_level_plugin_config:
-        utility.update({"config": {"from": "top_level_plugin_config"}})
+        utility["config"] = {"from": "top_level_plugin_config"}
     if environment_level_plugin_config:
-        environment.update(
-            {
-                "config": {
-                    "plugins": {
-                        "utilities": [
-                            {
-                                "name": plugin_name,
-                                "config": {"from": "environment_level_plugin_config"},
-                            }
-                        ]
+        environment["config"] = {
+            "plugins": {
+                "utilities": [
+                    {
+                        "name": plugin_name,
+                        "config": {"from": "environment_level_plugin_config"},
                     }
-                }
+                ]
             }
-        )
+        }
+
     if environment_level_env:
-        environment.update(
-            {"env": {"TEST_ENV_RESOLUTION_FROM": "environment_level_env"}}
-        )
+        environment["env"] = {"TEST_ENV_RESOLUTION_FROM": "environment_level_env"}
     if environment_level_plugin_config_indirected:
-        environment.update(
-            {
-                "config": {
-                    "plugins": {
-                        "utilities": [
-                            {
-                                "name": plugin_name,
-                                "config": {"from": "$INDIRECTED_ENV_VAR"},
-                            }
-                        ]
-                    }
-                },
-                "env": {
-                    "INDIRECTED_ENV_VAR": "environment_level_plugin_config_indrected"
-                },
-            }
-        )
+        environment |= {
+            "config": {
+                "plugins": {
+                    "utilities": [
+                        {
+                            "name": plugin_name,
+                            "config": {"from": "$INDIRECTED_ENV_VAR"},
+                        }
+                    ]
+                }
+            },
+            "env": {
+                "INDIRECTED_ENV_VAR": "environment_level_plugin_config_indrected"
+            },
+        }
+
     return {"plugins": {"utilities": [utility]}, "environments": [environment]}
 
 
@@ -197,8 +191,7 @@ class TestEnvVarResolution:
             )
         args = ["invoke"]
         for key in env_var_resolution_expectation.expected_env_values.keys():
-            args.append("--print-var")
-            args.append(key)
+            args.extend(("--print-var", key))
         args.append("test-env-var-resolution")
         result = cli_runner.invoke(cli, args)
         assert_cli_runner(result)

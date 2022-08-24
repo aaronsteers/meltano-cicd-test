@@ -77,10 +77,7 @@ class PluginType(YAMLEnum):
         Returns:
             The descriptor of the plugin type.
         """
-        if self is self.__class__.FILES:
-            return "file bundle"
-
-        return self.singular
+        return "file bundle" if self is self.__class__.FILES else self.singular
 
     @property
     def singular(self) -> str:
@@ -89,10 +86,7 @@ class PluginType(YAMLEnum):
         Returns:
             The singular form of the plugin type.
         """
-        if self is self.__class__.UTILITIES:
-            return "utility"
-
-        return self.value[:-1]
+        return "utility" if self is self.__class__.UTILITIES else self.value[:-1]
 
     @property
     def verb(self) -> str:
@@ -105,10 +99,7 @@ class PluginType(YAMLEnum):
             return self.singular
         if self is self.__class__.UTILITIES:
             return "utilize"
-        if self is self.__class__.MAPPERS:
-            return "map"
-
-        return self.value[:-3]
+        return "map" if self is self.__class__.MAPPERS else self.value[:-3]
 
     @property
     def discoverable(self) -> bool:

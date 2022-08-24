@@ -244,8 +244,7 @@ def run(ctx, name, elt_options):
     tracker = LegacyTracker(schedule_service.project)
     tracker.track_meltano_schedule("run", this_schedule)
 
-    exitcode = process.returncode
-    if exitcode:
+    if exitcode := process.returncode:
         sys.exit(exitcode)
 
 
@@ -354,17 +353,18 @@ def set_cmd(ctx, name, interval, job, extractor, loader, transform):
     schedule_service: ScheduleService = ctx.obj["schedule_service"]
     candidate = schedule_service.find_schedule(name)
 
-    if candidate.job:
-        if extractor or loader or transform:
-            raise click.ClickException(
-                "Cannot mix --job with --extractor/--loader/--transform"
-            )
+    if (
+        candidate.job
+        and (extractor or loader or transform)
+        or not candidate.job
+        and job
+    ):
+        raise click.ClickException(
+            "Cannot mix --job with --extractor/--loader/--transform"
+        )
+    elif candidate.job:
         updated = _update_job_schedule(candidate, job, interval)
     else:
-        if job:
-            raise click.ClickException(
-                "Cannot mix --job with --extractor/--loader/--transform"
-            )
         updated = _update_elt_schedule(
             candidate, extractor, loader, transform, interval
         )

@@ -63,8 +63,7 @@ class MailService:
             }
         )
 
-        unsubscribe_group = self.get_unsubscribe_group(subscription)
-        if unsubscribe_group:
+        if unsubscribe_group := self.get_unsubscribe_group(subscription):
             headers.set_asm_group_id(int(unsubscribe_group))
 
         return Message(

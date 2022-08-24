@@ -592,10 +592,7 @@ class TestLegacyCatalogSelectVisitor:
     @classmethod
     def metadata_is_selected(cls, metadata):
         inclusion = metadata.get("inclusion")
-        if inclusion == "automatic":
-            return True
-
-        return metadata.get("selected", False)
+        return True if inclusion == "automatic" else metadata.get("selected", False)
 
     @classmethod
     def assert_catalog_is_selected(cls, catalog):

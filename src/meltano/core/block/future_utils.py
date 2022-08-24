@@ -11,10 +11,7 @@ from meltano.core.utils import human_size
 
 def all_done(tasks: List[Task], done: Set[Task]) -> bool:
     """Iterate through a task list checking if ALL tasks are in the done set."""
-    for idx in tasks:
-        if idx not in done:
-            return False
-    return True
+    return all(idx in done for idx in tasks)
 
 
 def first_failed_future(exception_future: Task, done: Set[Task]) -> Optional[Task]:
@@ -28,11 +25,9 @@ def first_failed_future(exception_future: Task, done: Set[Task]) -> Optional[Tas
     """
     if exception_future in done:
         futures_done, _ = exception_future.result()
-        futures_failed = [
+        if futures_failed := [
             future for future in futures_done if future.exception() is not None
-        ]
-
-        if futures_failed:
+        ]:
             return futures_failed.pop()
 
 

@@ -58,7 +58,7 @@ def upgrade(ctx, project):
     help="Skip updating the Meltano package.",
 )
 @click.pass_context
-def all(ctx, pip_url, force, skip_package):  # noqa: WPS125
+def all(ctx, pip_url, force, skip_package):    # noqa: WPS125
     """
     Upgrade Meltano and your entire project to the latest version.
 
@@ -84,27 +84,27 @@ def all(ctx, pip_url, force, skip_package):  # noqa: WPS125
         if not os.getenv("MELTANO_PACKAGE_UPGRADED", default=False):
             click.echo()
             click.secho("Your Meltano project has been upgraded!", fg="green")
-    else:
-        package_upgraded = upgrade_service.upgrade_package(pip_url=pip_url, force=force)
-        if package_upgraded:
-            # Shell out instead of calling `upgrade_service` methods to
-            # ensure the latest code is used.
-            click.echo()
-            run = MeltanoInvoker(project).invoke(
-                ["upgrade", "--skip-package"],
-                env={"MELTANO_PACKAGE_UPGRADED": "true"},
-            )
+    elif package_upgraded := upgrade_service.upgrade_package(
+        pip_url=pip_url, force=force
+    ):
+        # Shell out instead of calling `upgrade_service` methods to
+        # ensure the latest code is used.
+        click.echo()
+        run = MeltanoInvoker(project).invoke(
+            ["upgrade", "--skip-package"],
+            env={"MELTANO_PACKAGE_UPGRADED": "true"},
+        )
 
-            if run.returncode == 0:
-                click.echo()
-                click.secho(
-                    "Meltano and your Meltano project have been upgraded!",
-                    fg="green",
-                )
-        else:
-            click.echo(
-                "Then, run `meltano upgrade --skip-package` to upgrade your project based on the latest version."
+        if run.returncode == 0:
+            click.echo()
+            click.secho(
+                "Meltano and your Meltano project have been upgraded!",
+                fg="green",
             )
+    else:
+        click.echo(
+            "Then, run `meltano upgrade --skip-package` to upgrade your project based on the latest version."
+        )
 
 
 @upgrade.command(short_help="Upgrade the Meltano package only.")

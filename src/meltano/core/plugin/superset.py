@@ -53,7 +53,7 @@ class Superset(BasePlugin):
         return {"config": "superset_config.py"}
 
     @hook("before_configure")
-    async def before_configure(self, invoker: SupersetInvoker, session):  # noqa: WPS217
+    async def before_configure(self, invoker: SupersetInvoker, session):    # noqa: WPS217
         """Write plugin configuration to superset_config.py.
 
         Args:
@@ -74,27 +74,25 @@ class Superset(BasePlugin):
             "        setattr(module, key, value)",
         ]
 
-        custom_config_filename = invoker.plugin_config_extras["_config_path"]
-        if custom_config_filename:
+        if custom_config_filename := invoker.plugin_config_extras["_config_path"]:
             custom_config_path = invoker.project.root.joinpath(custom_config_filename)
 
-            if custom_config_path.exists():
-                config_script_lines.extend(
-                    [
-                        "import imp",
-                        f'custom_config = imp.load_source("superset_config", "{str(custom_config_path)}")',
-                        "for key in dir(custom_config):",
-                        "    if key.isupper():",
-                        "        setattr(module, key, getattr(custom_config, key))",
-                    ]
-                )
-
-                logger.info(f"Merged in config from {custom_config_path}")
-            else:
+            if not custom_config_path.exists():
                 raise PluginExecutionError(
                     f"Could not find config file {custom_config_path}"
                 )
 
+            config_script_lines.extend(
+                [
+                    "import imp",
+                    f'custom_config = imp.load_source("superset_config", "{str(custom_config_path)}")',
+                    "for key in dir(custom_config):",
+                    "    if key.isupper():",
+                    "        setattr(module, key, getattr(custom_config, key))",
+                ]
+            )
+
+            logger.info(f"Merged in config from {custom_config_path}")
         config_path = invoker.files["config"]
         with open(config_path, "w") as config_file:
             config_file.write("\n".join(config_script_lines))

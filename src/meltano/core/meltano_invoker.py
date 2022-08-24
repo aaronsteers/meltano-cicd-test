@@ -55,17 +55,13 @@ class MeltanoInvoker:
         else:
             executable = Path(os.path.dirname(sys.executable), command)
 
-        if executable.exists():
-            return str(executable)
-
-        # Fall back on expecting command to be in the PATH
-        return command
+        return str(executable) if executable.exists() else command
 
     def _executable_env(self, env=None):
         exec_env = {}
 
         # Include env that project settings are evaluated in
-        exec_env.update(self.settings_service.env)
+        exec_env |= self.settings_service.env
 
         # Include env for settings explicitly overridden using CLI flags
         exec_env.update(

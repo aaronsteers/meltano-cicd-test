@@ -69,11 +69,11 @@ class Command(Canonical):
         """
         expanded = []
         for arg in shlex.split(self.args):
-            value = expand_env_vars(arg, env)
-            if not value:
-                raise UndefinedEnvVarError(name, arg)
+            if value := expand_env_vars(arg, env):
+                expanded.append(value)
 
-            expanded.append(value)
+            else:
+                raise UndefinedEnvVarError(name, arg)
 
         return expanded
 
@@ -113,12 +113,7 @@ class Command(Canonical):
         Returns:
             Command instance.
         """
-        if isinstance(obj, str):
-            # allow setting the arguments as the value
-            # without a description
-            return Command(args=obj)
-
-        return super().parse(obj)
+        return Command(args=obj) if isinstance(obj, str) else super().parse(obj)
 
     @classmethod
     def parse_all(cls: Type[TCommand], obj: Optional[dict]) -> Dict[str, TCommand]:

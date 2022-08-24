@@ -76,8 +76,7 @@ class MockAdapter(BaseAdapter):
             hub[index_key] = {}
             for plugin in discovery.get(plugin_type, []):
                 plugin_name = plugin["name"]
-                hub[index_key][plugin_name] = {}
-                hub[index_key][plugin_name]["variants"] = {}
+                hub[index_key][plugin_name] = {"variants": {}}
                 default_variant = None
 
                 variants = plugin.pop("variants", [])

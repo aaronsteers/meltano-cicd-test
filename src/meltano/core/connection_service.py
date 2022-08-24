@@ -54,10 +54,9 @@ class ConnectionService:
         }
 
         try:
-            url = dialect_templates[self.dialect](
+            return dialect_templates[self.dialect](
                 {**self.context.loader.config_dict(), **params}
             )
 
-            return url
         except KeyError:
             raise DialectNotSupportedError(self.dialect)

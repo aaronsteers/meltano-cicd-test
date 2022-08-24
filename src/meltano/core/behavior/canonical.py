@@ -63,13 +63,13 @@ class Canonical:  # noqa: WPS214 (too many methods)
             return list(map(Canonical.as_canonical, target))
 
         if isinstance(target, dict):
-            results = {}
-            for key, val in target.items():
-                if isinstance(val, Canonical):
-                    results[key] = val.canonical()
-                else:
-                    results[key] = Canonical.as_canonical(val)
-            return results
+            return {
+                key: val.canonical()
+                if isinstance(val, Canonical)
+                else Canonical.as_canonical(val)
+                for key, val in target.items()
+            }
+
 
         return copy.deepcopy(target)
 
@@ -106,10 +106,7 @@ class Canonical:  # noqa: WPS214 (too many methods)
         if obj is None:
             return None
 
-        if isinstance(obj, cls):
-            return obj
-
-        return cls(**obj)
+        return obj if isinstance(obj, cls) else cls(**obj)
 
     def is_attr_set(self, attr):
         """Return whether specified attribute has a non-default/fallback value set.
@@ -198,15 +195,13 @@ class Canonical:  # noqa: WPS214 (too many methods)
             An iterator over the attributes set on the current instance.
         """
         for key, val in self._dict.items():
-            if not val:
-                if key in self._verbatim:
-                    if val is None:
-                        continue
-                else:
-                    # bool values are valid and should be forwarded
-                    if val is not False:
-                        continue
-
+            if not val and (
+                key in self._verbatim
+                and val is None
+                or key not in self._verbatim
+                and val is not False
+            ):
+                continue
             # empty canonicals should be skipped
             if isinstance(val, Canonical) and not dict(val):
                 continue

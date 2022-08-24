@@ -352,18 +352,17 @@ class SettingsService(ABC):  # noqa: WPS214
 
         expandable_env = {**self.project.dotenv_env, **self.env}
         if setting_def and setting_def.is_extra:
-            expandable_env.update(
-                self.as_env(
-                    extras=False,
-                    redacted=redacted,
-                    source=source,
-                    source_manager=source_manager,
-                )
+            expandable_env |= self.as_env(
+                extras=False,
+                redacted=redacted,
+                source=source,
+                source_manager=source_manager,
             )
+
 
         manager = source_manager or source.manager(self, **kwargs)
         value, get_metadata = manager.get(name, setting_def=setting_def)
-        metadata.update(get_metadata)
+        metadata |= get_metadata
 
         # Can't do conventional SettingsService.feature_flag call to check;
         # it would result in circular dependency
@@ -493,7 +492,7 @@ class SettingsService(ABC):  # noqa: WPS214
 
         manager = store.manager(self, **kwargs)
         set_metadata = manager.set(name, path, value, setting_def=setting_def)
-        metadata.update(set_metadata)
+        metadata |= set_metadata
 
         self.log(f"Set setting '{name}' with metadata: {metadata}")
         return value, metadata
@@ -538,7 +537,7 @@ class SettingsService(ABC):  # noqa: WPS214
 
         manager = store.manager(self, **kwargs)
         unset_metadata = manager.unset(name, path, setting_def=setting_def)
-        metadata.update(unset_metadata)
+        metadata |= unset_metadata
 
         self.log(f"Unset setting '{name}' with metadata: {metadata}")
         return metadata
@@ -557,7 +556,7 @@ class SettingsService(ABC):  # noqa: WPS214
 
         manager = store.manager(self, **kwargs)
         reset_metadata = manager.reset()
-        metadata.update(reset_metadata)
+        metadata |= reset_metadata
 
         self.log(f"Reset settings with metadata: {metadata}")
         return metadata

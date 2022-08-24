@@ -266,8 +266,7 @@ class SingerTap(SingerPlugin):
             )
             return
 
-        custom_state_filename = plugin_invoker.plugin_config_extras["_state"]
-        if custom_state_filename:
+        if custom_state_filename := plugin_invoker.plugin_config_extras["_state"]:
             custom_state_path = plugin_invoker.project.root.joinpath(
                 custom_state_filename
             )
@@ -281,10 +280,9 @@ class SingerTap(SingerPlugin):
                 ) from err
 
             return
-        # the `state.json` is stored in the database
-        state = StateService(elt_context.session).get_state(elt_context.job.job_id)
-
-        if state:
+        if state := StateService(elt_context.session).get_state(
+            elt_context.job.job_id
+        ):
             with state_path.open("w") as state_file:
                 json.dump(state.get("singer_state"), state_file, indent=2)
         else:
@@ -314,7 +312,7 @@ class SingerTap(SingerPlugin):
         except PluginLacksCapabilityError:
             pass
 
-    async def discover_catalog(self, plugin_invoker: PluginInvoker):  # noqa: WPS231
+    async def discover_catalog(self, plugin_invoker: PluginInvoker):    # noqa: WPS231
         """Perform catalog discovery.
 
         Args:
@@ -347,8 +345,9 @@ class SingerTap(SingerPlugin):
         except FileNotFoundError:
             pass
 
-        custom_catalog_filename = plugin_invoker.plugin_config_extras["_catalog"]
-        if custom_catalog_filename:
+        if custom_catalog_filename := plugin_invoker.plugin_config_extras[
+            "_catalog"
+        ]:
             custom_catalog_path = plugin_invoker.project.root.joinpath(
                 custom_catalog_filename
             )
@@ -376,7 +375,7 @@ class SingerTap(SingerPlugin):
 
     async def run_discovery(  # noqa: WPS238
         self, plugin_invoker: PluginInvoker, catalog_path: Path
-    ):  # noqa: DAR401
+    ):    # noqa: DAR401
         """Run tap in discovery mode and store the result.
 
         Args:
@@ -423,8 +422,9 @@ class SingerTap(SingerPlugin):
                     invoke_futures,
                     return_when=asyncio.ALL_COMPLETED,
                 )
-                failed = [future for future in done if future.exception() is not None]
-                if failed:
+                if failed := [
+                    future for future in done if future.exception() is not None
+                ]:
                     failed_future = failed.pop()
                     raise failed_future.exception()
             exit_code = handle.returncode
@@ -521,8 +521,7 @@ class SingerTap(SingerPlugin):
             with catalog_path.open("w") as catalog_f:
                 json.dump(catalog, catalog_f, indent=2)
 
-            cache_key = self.catalog_cache_key(plugin_invoker)
-            if cache_key:
+            if cache_key := self.catalog_cache_key(plugin_invoker):
                 catalog_cache_key_path.write_text(cache_key)
             else:
                 try:  # noqa: WPS505

@@ -269,11 +269,9 @@ def _validate_tasks(project: Project, task_set: TaskSets) -> bool:
     for task in task_set.flat_args_per_set:
         blocks = task
         logger.debug(
-            "validating tasks",
-            job=task_set.name,
-            task=task,
-            blocks=blocks,
+            "validating tasks", job=task_set.name, blocks=blocks, blocks=blocks
         )
+
         try:
             block_parser = BlockParser(logger, project, blocks)
             parsed_blocks = list(block_parser.find_blocks(0))

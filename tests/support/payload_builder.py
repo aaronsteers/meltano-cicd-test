@@ -114,5 +114,5 @@ class PayloadBuilder:
             },
         }
 
-        payload.update(self._defaults)
+        payload |= self._defaults
         return payload

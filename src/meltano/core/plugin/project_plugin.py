@@ -412,15 +412,13 @@ class ProjectPlugin(PluginRef):  # noqa: WPS230, WPS214 # too many attrs and met
             plugin types.
         """
         plugin_types = plugin_types or list(PluginType)
-        plugins: dict[PluginType, list[PluginRequirement]] = {}
-
-        for plugin_type in plugin_types:
-            plugins[plugin_type] = [
+        return {
+            plugin_type: [
                 *self._parent.all_requires.get(plugin_type, []),
                 *self.requires.get(plugin_type, []),
             ]
-
-        return plugins
+            for plugin_type in plugin_types
+        }
 
     @property
     def all_requires(self) -> dict[PluginType, list]:

@@ -57,9 +57,7 @@ class EnvVar:
         Returns:
             Env var value for given env var.
         """
-        if self.negated:
-            return str(not utils.truthy(env[self.key]))
-        return env[self.key]
+        return str(not utils.truthy(env[self.key])) if self.negated else env[self.key]
 
 
 class SettingMissingError(Error):
@@ -313,7 +311,7 @@ class SettingDefinition(NameEq, Canonical):
                 env_keys.extend(utils.to_env_var(prefix, alias) for prefix in prefixes)
 
         if include_custom:
-            env_keys.extend(env for env in self.env_aliases)
+            env_keys.extend(iter(self.env_aliases))
 
         return [EnvVar(key) for key in utils.uniques_in(env_keys)]
 

@@ -48,7 +48,7 @@ class Hookable(type):
 
         return cls
 
-    def __prepare__(name, bases, **kwds):
+    def __prepare__(self, bases, **kwds):
         return OrderedDict()
 
 

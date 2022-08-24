@@ -415,7 +415,7 @@ class MetadataExecutor(CatalogExecutor):
         self._stream = node
         tap_stream_id = self._stream["tap_stream_id"]
 
-        if not "metadata" in node:
+        if "metadata" not in node:
             node["metadata"] = []
 
         self.ensure_metadata([])
@@ -471,7 +471,7 @@ class SchemaExecutor(CatalogExecutor):
         self._stream = None
         self._rules = rules
 
-    def ensure_property(self, breadcrumb: List[str]):  # noqa: WPS231
+    def ensure_property(self, breadcrumb: List[str]):    # noqa: WPS231
         """Create nodes for the breadcrumb and schema extra that matches."""
         next_node: Dict[str, Any] = self._stream["schema"]
 
@@ -480,9 +480,7 @@ class SchemaExecutor(CatalogExecutor):
             # ensure property nodes exist for matching breadcrumbs.
             if re.match(r"[*?\[\]]", key):
                 node_keys = next_node.keys()
-                matching_keys = fnmatch.filter(node_keys, key)
-
-                if matching_keys:
+                if matching_keys := fnmatch.filter(node_keys, key):
                     matching_breadcrumb = breadcrumb.copy()
                     for key in matching_keys:
                         matching_breadcrumb[idx] = key
@@ -491,7 +489,7 @@ class SchemaExecutor(CatalogExecutor):
                 break
 
             # If a property node for this breadcrumb doesn't exist yet, create it.
-            if not key in next_node:
+            if key not in next_node:
                 next_node[key] = {}
 
             next_node = next_node[key]
@@ -501,7 +499,7 @@ class SchemaExecutor(CatalogExecutor):
         self._stream = node
         tap_stream_id: str = self._stream["tap_stream_id"]
 
-        if not "schema" in node:
+        if "schema" not in node:
             node["schema"] = {"type": "object"}
 
         for rule in SchemaRule.matching(self._rules, tap_stream_id):
@@ -591,18 +589,19 @@ class ListSelectedExecutor(CatalogExecutor):
 
         inclusion: str = metadata.get("inclusion")
         selected: Optional[bool] = metadata.get("selected")
-        selected_by_default: bool = metadata.get("selected-by-default", False)
-
         if inclusion == "automatic":
             return SelectionType.AUTOMATIC
 
         if selected is True:
             return SelectionType.SELECTED
 
-        if selected is None and selected_by_default:
-            return SelectionType.SELECTED
+        selected_by_default: bool = metadata.get("selected-by-default", False)
 
-        return SelectionType.EXCLUDED
+        return (
+            SelectionType.SELECTED
+            if selected is None and selected_by_default
+            else SelectionType.EXCLUDED
+        )
 
     def stream_node(self, node: Node, path: str):
         """Initialize empty set for selected nodes in stream."""

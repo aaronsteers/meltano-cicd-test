@@ -319,10 +319,7 @@ class ExtractLoadBlocks(BlockSet):  # noqa: WPS214
         Returns:
             bool indicating whether BlockSet has 'state' capability
         """
-        for block in self.blocks:
-            if block.has_state:
-                return True
-        return False
+        return any(block.has_state for block in self.blocks)
 
     @property
     def state_service(self) -> StateService:
@@ -449,8 +446,9 @@ class ExtractLoadBlocks(BlockSet):  # noqa: WPS214
         job = self.context.job
         StaleJobFailer(job.job_id).fail_stale_jobs(self.context.session)
         if not self.context.force:
-            existing = JobFinder(job.job_id).latest_running(self.context.session)
-            if existing:
+            if existing := JobFinder(job.job_id).latest_running(
+                self.context.session
+            ):
                 raise RunnerError(
                     f"Another '{job.job_id}' pipeline is already running which started at {existing.started_at}. "
                     + "To ignore this check use the '--force' option."
@@ -679,8 +677,9 @@ class ELBExecutionManager:
         logger.debug("waiting for process completion or exception")
         done = await self.elb.process_wait(output_exception_future, start_idx)
 
-        output_futures_failed = first_failed_future(output_exception_future, done)
-        if output_futures_failed:
+        if output_futures_failed := first_failed_future(
+            output_exception_future, done
+        ):
             # Special behavior for a producer stdout handler raising a line length limit error.
             if self.elb.head.proxy_stdout() == output_futures_failed:
                 handle_producer_line_length_limit_error(
@@ -766,24 +765,23 @@ def _check_exit_codes(  # noqa: WPS238
     Raises:
         RunnerError: if the producer, consumer, or mapper exit codes are non-zero
     """
-    if producer_code and consumer_code:
-        raise RunnerError(
-            "Extractor and loader failed",
-            {PluginType.EXTRACTORS: producer_code, PluginType.LOADERS: consumer_code},
-        )
-
     if producer_code:
+        if consumer_code:
+            raise RunnerError(
+                "Extractor and loader failed",
+                {PluginType.EXTRACTORS: producer_code, PluginType.LOADERS: consumer_code},
+            )
+
         raise RunnerError("Extractor failed", {PluginType.EXTRACTORS: producer_code})
 
     if consumer_code:
         raise RunnerError("Loader failed", {PluginType.LOADERS: consumer_code})
 
-    failed_mappers = []
-    for mapper_id in intermediate_codes.keys():
-        if intermediate_codes[mapper_id]:
-            failed_mappers.append({mapper_id: intermediate_codes[mapper_id]})
-
-    if failed_mappers:
+    if failed_mappers := [
+        {mapper_id: intermediate_codes[mapper_id]}
+        for mapper_id, value in intermediate_codes.items()
+        if value
+    ]:
         raise RunnerError("Mappers failed", failed_mappers)
 
 

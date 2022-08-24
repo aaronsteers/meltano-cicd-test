@@ -190,7 +190,7 @@ def nest(d: dict, path: str, value={}, maxsplit=-1, force=False):
 
         cursor = cursor[key]
 
-    if not tail in cursor or (type(cursor[tail]) is not type(value) and force):
+    if tail not in cursor or (type(cursor[tail]) is not type(value) and force):
         # We need to copy the value to make sure
         # the `value` parameter is not mutated.
         cursor[tail] = deepcopy(value)
@@ -214,10 +214,7 @@ def flatten(d: Dict, reducer: Union[str, Callable] = "tuple", **kwargs):
     """Wrapper arround `flatten_dict.flatten` that adds `dot` and `env_var` reducers."""
 
     def dot_reducer(*xs):
-        if xs[0] is None:
-            return xs[1]
-        else:
-            return ".".join(xs)
+        return xs[1] if xs[0] is None else ".".join(xs)
 
     if reducer == "dot":
         reducer = dot_reducer
@@ -250,7 +247,7 @@ def map_dict(f: Callable, d: Dict):
 
 
 def truthy(val: str) -> bool:
-    return str(val).lower() in TRUTHY
+    return val.lower() in TRUTHY
 
 
 def coerce_datetime(d: Union[date, datetime]) -> Optional[datetime]:
@@ -258,10 +255,7 @@ def coerce_datetime(d: Union[date, datetime]) -> Optional[datetime]:
     if d is None:
         return None
 
-    if isinstance(d, datetime):
-        return d
-
-    return datetime.combine(d, time())
+    return d if isinstance(d, datetime) else datetime.combine(d, time())
 
 
 def iso8601_datetime(d: str) -> Optional[datetime]:
@@ -276,11 +270,8 @@ def iso8601_datetime(d: str) -> Optional[datetime]:
     ]
 
     for format in isoformats:
-        try:
+        with suppress(ValueError):
             return coerce_datetime(datetime.strptime(d, format))
-        except ValueError:
-            pass
-
     raise ValueError(f"{d} is not a valid UTC date.")
 
 
@@ -317,11 +308,7 @@ def makedirs(func):
 
         # if there is an extension, only create the base dir
         _, ext = os.path.splitext(path)
-        if ext:
-            dir = os.path.dirname(path)
-        else:
-            dir = path
-
+        dir = os.path.dirname(path) if ext else path
         os.makedirs(dir, exist_ok=True)
         return path
 
@@ -413,16 +400,11 @@ def expand_env_vars(raw_value, env: Dict, raise_if_missing: bool = False):
         except KeyError as e:
             if raise_if_missing:
                 raise EnvironmentVariableNotSetError(e.args[0])
-            else:
-                logger.debug(f"Variable '${var}' is missing from the environment.")
-                return None
+            logger.debug(f"Variable '${var}' is missing from the environment.")
+            return None
 
     fullmatch = re.fullmatch(var_matcher, raw_value)
-    if fullmatch:
-        # If the entire value is an env var reference, return None if it isn't set
-        return subst(fullmatch)
-
-    return re.sub(var_matcher, subst, raw_value)
+    return subst(fullmatch) if fullmatch else re.sub(var_matcher, subst, raw_value)
 
 
 def uniques_in(original):

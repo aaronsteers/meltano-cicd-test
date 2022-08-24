@@ -131,13 +131,11 @@ class SingerRunner(Runner):
         # If `output_exception_future` completes first, one of the output handlers raised an exception or all completed successfully.
         if output_exception_future in done:
             output_futures_done, _ = output_exception_future.result()
-            output_futures_failed = [
+            if output_futures_failed := [
                 future
                 for future in output_futures_done
                 if future.exception() is not None
-            ]
-
-            if output_futures_failed:
+            ]:
                 # If any output handler raised an exception, re-raise it.
 
                 # Special behavior for the tap stdout handler raising a line length limit error.
