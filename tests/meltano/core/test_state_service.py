@@ -26,10 +26,7 @@ class TestStateService:
             assert state_service.get_state(state_id) == expected_state
 
     def test_list_state(self, state_service, state_ids_with_expected_states):
-        assert state_service.list_state() == {
-            state_id: expected_state
-            for (state_id, expected_state) in state_ids_with_expected_states
-        }
+        assert state_service.list_state() == dict(state_ids_with_expected_states)
 
     def test_add_state(self, state_service, payloads):
         mock_state_id = "nonexistent"
@@ -50,9 +47,7 @@ class TestStateService:
             assert state_service.get_state(job.job_id) == payloads.mock_empty_payload
 
     def test_merge_state(self, job_history_session, jobs, state_service):
-        job_pairs = []
-        for idx in range(0, len(jobs) - 1, 2):
-            job_pairs.append((jobs[idx], jobs[idx + 1]))
+        job_pairs = [(jobs[idx], jobs[idx + 1]) for idx in range(0, len(jobs) - 1, 2)]
         for (job_src, job_dst) in job_pairs:
             state_src = state_service.get_state(job_src.job_id)
             state_dst = state_service.get_state(job_dst.job_id)

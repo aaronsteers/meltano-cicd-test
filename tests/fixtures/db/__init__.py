@@ -20,7 +20,7 @@ def engine_uri_env(engine_uri):
 def vacuum_db(engine_sessionmaker):
     yield
 
-    logging.debug(f"Cleaning system database...")
+    logging.debug("Cleaning system database...")
 
     engine, _ = engine_sessionmaker
     close_all_sessions()

@@ -30,8 +30,8 @@ class APIWorker(threading.Thread):
     def run(self):
         """Run the initalized API Workers with the App Server requested."""
         with self.settings_service.feature_flag(
-            FeatureFlags.ENABLE_UVICORN, raise_error=False
-        ) as allow:
+                FeatureFlags.ENABLE_UVICORN, raise_error=False
+            ) as allow:
 
             enable_uvicorn = allow
 
@@ -60,13 +60,12 @@ class APIWorker(threading.Thread):
                 )
 
                 # If windows and 127.0.0.1 only allowed changing bind host to accomidate
-                if platform.system() == "Windows":
-                    if (
-                        arg_forwarded_allow_ips == "127.0.0.1"
-                        and arg_bind_host == "0.0.0.0"  # noqa: S104
-                    ):
-                        # If left at 0.0.0.0 the server will respond to any request receieved on any interface
-                        arg_bind_host = "127.0.0.1"
+                if platform.system() == "Windows" and (
+                    arg_forwarded_allow_ips == "127.0.0.1"
+                    and arg_bind_host == "0.0.0.0"  # noqa: S104
+                ):
+                    # If left at 0.0.0.0 the server will respond to any request receieved on any interface
+                    arg_bind_host = "127.0.0.1"
 
                 # Setup args for uvicorn using bind info from the project setings service
                 args = [

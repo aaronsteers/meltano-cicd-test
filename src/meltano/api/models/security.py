@@ -63,10 +63,7 @@ class Role(db.Model, RoleMixin):
     description = db.Column(db.String(255))
 
     def __eq__(self, other):
-        if isinstance(other, Role):
-            return super().__eq__(other)
-
-        return self.name == other
+        return super().__eq__(other) if isinstance(other, Role) else self.name == other
 
     def __hash__(self):
         return hash(self.name)

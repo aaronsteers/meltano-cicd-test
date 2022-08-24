@@ -1,5 +1,6 @@
 """Defines helpers related to the system database."""
 
+
 import logging
 import time
 
@@ -13,14 +14,13 @@ from .project_settings_service import ProjectSettingsService
 
 # Keep a Project → Engine mapping to serve
 # the same engine for the same Project
-_engines = dict()
+_engines = {}
 
 
 def project_engine(project, default=False) -> ("Engine", sessionmaker):
     """Creates and register a SQLAlchemy engine for a Meltano project instance."""
 
-    existing_engine = _engines.get(project)
-    if existing_engine:
+    if existing_engine := _engines.get(project):
         return existing_engine
 
     settings = ProjectSettingsService(project)

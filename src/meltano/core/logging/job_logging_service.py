@@ -37,7 +37,7 @@ class JobLoggingService:
         self, state_id: str, run_id: str, file_name: str = "elt.log"
     ) -> str:
         """Generate an internal etl log path and name."""
-        return self.logs_dir(state_id, str(run_id), file_name)
+        return self.logs_dir(state_id, run_id, file_name)
 
     @contextmanager
     def create_log(self, state_id, run_id, file_name="elt.log"):

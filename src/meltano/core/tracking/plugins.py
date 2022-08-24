@@ -29,9 +29,11 @@ def plugins_tracking_context_from_block(
         The PluginsTrackingContext for the given block.
     """
     if isinstance(blk, BlockSet):
-        plugins: list[(ProjectPlugin, str)] = []
-        for plugin_block in blk.blocks:
-            plugins.append((plugin_block.context.plugin, plugin_block.plugin_args))
+        plugins: list[(ProjectPlugin, str)] = [
+            (plugin_block.context.plugin, plugin_block.plugin_args)
+            for plugin_block in blk.blocks
+        ]
+
         return PluginsTrackingContext(plugins)
     if isinstance(blk, PluginCommandBlock):
         return PluginsTrackingContext([(blk.context.plugin, blk.command)])
@@ -73,10 +75,7 @@ class PluginsTrackingContext(SelfDescribingJson):
         Args:
             plugins: The Meltano plugins and the requested command.
         """
-        tracking_context = []
-        for plugin, cmd in plugins:
-            tracking_context.append(_from_plugin(plugin, cmd))
-
+        tracking_context = [_from_plugin(plugin, cmd) for plugin, cmd in plugins]
         super().__init__(
             f"{PLUGINS_CONTEXT_SCHEMA}/{PLUGINS_CONTEXT_SCHEMA_VERSION}",
             {"context_uuid": str(uuid.uuid4()), "plugins": tracking_context},

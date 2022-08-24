@@ -92,14 +92,11 @@ class PluginInstallState:
         if self.status is PluginInstallStatus.RUNNING:
             if self.reason is PluginInstallReason.UPGRADE:
                 return "Updating"
-            return "Installing"
+            else:
+                return "Installing"
 
         if self.status is PluginInstallStatus.SUCCESS:
-            if self.reason is PluginInstallReason.UPGRADE:
-                return "Updated"
-
-            return "Installed"
-
+            return "Updated" if self.reason is PluginInstallReason.UPGRADE else "Installed"
         if self.status is PluginInstallStatus.SKIPPED:
             return "Skipped installing"
 

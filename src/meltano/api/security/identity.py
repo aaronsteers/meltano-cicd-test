@@ -34,7 +34,7 @@ class FreeUser:
     regarding the loading of the identity.
     """
 
-    def has_role(*args):
+    def has_role(self):
         return True
 
     @property

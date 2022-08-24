@@ -138,7 +138,7 @@ class Job(SystemModel):  # noqa: WPS214
         self._state = str(value)
 
     @state.comparator  # noqa: WPS440
-    def state(cls):  # noqa: N805, WPS440
+    def state(self):    # noqa: N805, WPS440
         """Use this comparison to compare Job.state to State.
 
         See:
@@ -147,7 +147,7 @@ class Job(SystemModel):  # noqa: WPS214
         Returns:
             Result of comparison
         """
-        return StateComparator(cls._state)
+        return StateComparator(self._state)
 
     def is_running(self):
         """Return whether Job is running.
@@ -211,10 +211,7 @@ class Job(SystemModel):  # noqa: WPS214
         Returns:
             bool indicating whether the given state is transitable from this job's state
         """
-        if self.state is state:
-            return True
-
-        return state.name in self.state.transitions()
+        return True if self.state is state else state.name in self.state.transitions()
 
     def transit(self, state: State) -> (State, State):
         """Transition this job into the given state.
@@ -385,7 +382,4 @@ class Job(SystemModel):  # noqa: WPS214
         if isinstance(err, (KeyboardInterrupt, asyncio.CancelledError)):
             return "The process was interrupted"
 
-        if str(err):
-            return str(err)
-
-        return repr(err)
+        return str(err) or repr(err)

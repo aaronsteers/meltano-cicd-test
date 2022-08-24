@@ -558,10 +558,7 @@ class MeltanoYmlStoreManager(SettingsStoreManager):
         Raises:
             ConflictingSettingValueException: if multiple conflicting values for the same setting are provided.
         """
-        keys = [name]
-        if setting_def:
-            keys = [setting_def.name, *setting_def.aliases]
-
+        keys = [setting_def.name, *setting_def.aliases] if setting_def else [name]
         flat_config = self.flat_config
         vals_with_metadata = []
         for key in keys:
@@ -1188,8 +1185,9 @@ class AutoStoreManager(SettingsStoreManager):
 
         metadata["source"] = found_source
 
-        auto_store = self.auto_store(name, found_source, setting_def=setting_def)
-        if auto_store:
+        if auto_store := self.auto_store(
+            name, found_source, setting_def=setting_def
+        ):
             metadata["auto_store"] = auto_store
             metadata["overwritable"] = auto_store.can_overwrite(found_source)
 
@@ -1215,11 +1213,10 @@ class AutoStoreManager(SettingsStoreManager):
         current_value, metadata = self.get(name, setting_def=setting_def)
         source = metadata["source"]
 
-        if setting_def:
-            if value == setting_def.value:
-                # Unset everything so we fall down on default
-                self.unset(name, path, setting_def=setting_def)
-                return {"store": SettingValueStore.DEFAULT}
+        if setting_def and value == setting_def.value:
+            # Unset everything so we fall down on default
+            self.unset(name, path, setting_def=setting_def)
+            return {"store": SettingValueStore.DEFAULT}
 
         store = self.auto_store(name, source, setting_def=setting_def)
         if store is None:

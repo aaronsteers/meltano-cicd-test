@@ -114,11 +114,7 @@ def gitlab_token_identity(token):
         )
         identity.user = token_user
         db.session.add(identity)
-    elif identity.user == token_user:
-        # we have a match, a user with this email and identity
-        # TODO: update the identity if need be
-        pass
-    else:
+    elif identity.user != token_user:
         raise OAuthError("This identity is already claimed by another user.")
 
     return identity

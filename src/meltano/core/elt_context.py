@@ -454,7 +454,7 @@ class ELTContextBuilder:  # noqa: WPS214
                 config=config,
             )
 
-            env.update(extractor.env)
+            env |= extractor.env
 
         loader = None
         if self._loader:

@@ -36,7 +36,7 @@ def cli(  # noqa: WPS231
     verbose: int,
     environment: str,
     no_environment: bool,
-):  # noqa: WPS231
+):    # noqa: WPS231
     """
     ELT for the DataOps era.
 
@@ -54,8 +54,7 @@ def cli(  # noqa: WPS231
         project = Project.find()
         setup_logging(project)
 
-        readonly = ProjectSettingsService(project).get("project_readonly")
-        if readonly:
+        if readonly := ProjectSettingsService(project).get("project_readonly"):
             project.readonly = True
         if project.readonly:
             logger.debug("Project is read-only.")

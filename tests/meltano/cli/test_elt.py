@@ -57,17 +57,13 @@ class LogEntry:
         """
         for line in lines:
 
-            matches = (
+            if matches := (
                 line.get("name") == self.name
                 and line.get("cmd_type") == self.cmd_type
                 and line.get("event").startswith(self.event)
                 and line.get("level") == self.level
-            )
-
-            if matches:
-                if self.stdio:
-                    return line.get("stdio") == self.stdio
-                return True
+            ):
+                return line.get("stdio") == self.stdio if self.stdio else True
 
 
 def assert_lines(output, *lines):
@@ -90,11 +86,10 @@ def exception_logged(result_output: str, exc: Exception) -> bool:
         parsed_line = json.loads(line)
         seen_lines.append(parsed_line)
 
-    for line in seen_lines:
-        if line.get("exc_info"):
-            if repr(exc) in line.get("exc_info"):
-                return True
-    return False
+    return any(
+        line.get("exc_info") and repr(exc) in line.get("exc_info")
+        for line in seen_lines
+    )
 
 
 def assert_log_lines(result_output: str, expected: List[LogEntry]):

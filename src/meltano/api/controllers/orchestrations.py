@@ -209,10 +209,7 @@ def job_state() -> Response:
     jobs = []
     for state_id in state_ids:
         finder = JobFinder(state_id)
-        state_job = finder.latest(db.session)
-        # Validate existence first as a job may not be queued yet as a result of
-        # another prerequisite async process (dbt installation for example)
-        if state_job:
+        if state_job := finder.latest(db.session):
             state_job_success = finder.latest_success(db.session)
             jobs.append(
                 {

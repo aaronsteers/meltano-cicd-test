@@ -54,14 +54,13 @@ class UpgradeService:
         meltano_file_path = "/src/meltano/__init__.py"
         editable = meltano.__file__.endswith(meltano_file_path)
         if editable and not force:
-            meltano_dir = meltano.__file__[0 : -len(meltano_file_path)]
+            meltano_dir = meltano.__file__[:-len(meltano_file_path)]
             raise AutomaticPackageUpgradeError(
                 reason="it is installed from source",
                 instructions=f"navigate to `{meltano_dir}` and run `git pull`",
             )
 
-        in_docker = os.path.exists("/.dockerenv")
-        if in_docker:
+        if in_docker := os.path.exists("/.dockerenv"):
             raise AutomaticPackageUpgradeError(
                 reason="it is installed inside Docker",
                 instructions="pull the latest Docker image using `docker pull meltano/meltano` and recreate any containers you may have created",
@@ -75,7 +74,7 @@ class UpgradeService:
         )
 
         if run.returncode != 0:
-            raise UpgradeError(f"Failed to upgrade `meltano`.", run)
+            raise UpgradeError("Failed to upgrade `meltano`.", run)
 
         return True
 

@@ -69,9 +69,9 @@ class ContainerSpec(Canonical):
         env = {}
 
         if additional_env:
-            env.update(additional_env)
+            env |= additional_env
 
-        env.update(self.env)
+        env |= self.env
         env_config = env_mapping_to_docker(env)
 
         volumes = [expand_env_vars(bind, env) for bind in self.volumes]

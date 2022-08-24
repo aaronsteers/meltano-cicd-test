@@ -48,11 +48,10 @@ def _flat_split(items):
     for el in items:
         if isinstance(el, Iterable) and not isinstance(el, str):
             yield from _flat_split(el)
+        elif " " in el:
+            yield from _flat_split(el.split(" "))
         else:
-            if " " in el:
-                yield from _flat_split(el.split(" "))
-            else:
-                yield el
+            yield el
 
 
 class TaskSets(NameEq, Canonical):

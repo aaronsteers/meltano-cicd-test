@@ -135,17 +135,17 @@ class RolesResource(Resource):
         try:
             role = Role.query.filter_by(name=role["name"]).one()
 
-            if not user:
-                if role == "admin":
-                    return "The `admin` role cannot be deleted.", 403
-
-                # delete the role
-                db.session.delete(role)
-            else:
+            if user:
                 # unassign the user-role
                 assigned_user = role.users.filter(User.username == user).one()
                 role.users.remove(assigned_user)
 
+            elif role == "admin":
+                return "The `admin` role cannot be deleted.", 403
+
+            else:
+                # delete the role
+                db.session.delete(role)
             db.session.commit()
         except Exception as err:
             return str(err), 400

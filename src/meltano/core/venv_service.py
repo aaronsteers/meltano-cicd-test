@@ -131,9 +131,11 @@ class VenvService:
             # clean up deprecated feature
             return True
         existing_fingerprint = self.read_fingerprint()
-        if not existing_fingerprint:
-            return True
-        return existing_fingerprint != fingerprint(pip_urls)
+        return (
+            existing_fingerprint != fingerprint(pip_urls)
+            if existing_fingerprint
+            else True
+        )
 
     def clean_run_files(self):
         """Destroy cached configuration files, if they exist."""
@@ -141,7 +143,6 @@ class VenvService:
             shutil.rmtree(self.project.run_dir(self.name, make_dirs=False))
         except FileNotFoundError:
             logger.debug("No cached configuration files to remove")
-            pass
 
     def clean(self):
         """Destroy the virtual environment, if it exists."""
@@ -155,8 +156,6 @@ class VenvService:
         except FileNotFoundError:
             # If the VirtualEnv has never been created before do nothing
             logger.debug("No old virtual environment to remove")
-            pass
-
         return
 
     async def create(self):

@@ -125,10 +125,9 @@ class StateService:
         incomplete_since = None
         finder = JobFinder(state_id)
 
-        # Get the state for the most recent completed job.
-        # Do not consider dummy jobs create via add_state.
-        state_job = finder.latest_with_payload(self.session, flags=Payload.STATE)
-        if state_job:
+        if state_job := finder.latest_with_payload(
+            self.session, flags=Payload.STATE
+        ):
             logger.info(f"Found state from {state_job.started_at}.")
             incomplete_since = state_job.ended_at
             if "singer_state" in state_job.payload:

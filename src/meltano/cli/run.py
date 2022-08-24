@@ -84,10 +84,11 @@ async def run(
 
     \b\nRead more at https://docs.meltano.com/reference/command-line-interface#run
     """
-    if dry_run:
-        if not ProjectSettingsService.config_override.get("cli.log_level"):
-            logger.info("Setting 'console' handler log level to 'debug' for dry run")
-            change_console_log_level()
+    if dry_run and not ProjectSettingsService.config_override.get(
+        "cli.log_level"
+    ):
+        logger.info("Setting 'console' handler log level to 'debug' for dry run")
+        change_console_log_level()
 
     tracker = Tracker(project)
     cmd_ctx = cli_context_builder(

@@ -71,8 +71,7 @@ def state_service_from_state_id(
 ) -> Optional[StateService]:
     """Instantiate by parsing a state_id."""
     state_id_re = re.compile(r"^(?P<env>.+)\:(?P<tap>.+)-to-(?P<target>.+)$")
-    match = state_id_re.match(state_id)
-    if match:
+    if match := state_id_re.match(state_id):
         # If the state_id matches convention (i.e., job has been run via "meltano run"),
         # try parsing into BlockSet.
         # This way, we get BlockSet validation and raise an error if no
@@ -80,14 +79,16 @@ def state_service_from_state_id(
         try:
             if not project.active_environment:
                 logger.warn(
-                    f"Running state operation for environment '{match.group('env')}' outside of an environment"
+                    f"Running state operation for environment '{match['env']}' outside of an environment"
                 )
-            elif project.active_environment.name != match.group("env"):
+
+            elif project.active_environment.name != match["env"]:
                 logger.warn(
-                    f"Environment '{match.group('env')}' used in state operation does not match current environment '{project.active_environment.name}'."
+                    f"Environment '{match['env']}' used in state operation does not match current environment '{project.active_environment.name}'."
                 )
-            project.activate_environment(match.group("env"))
-            blocks = [match.group("tap"), match.group("target")]
+
+            project.activate_environment(match["env"])
+            blocks = [match["tap"], match["target"]]
             parser = BlockParser(logger, project, blocks)
             return next(parser.find_blocks()).state_service
         except Exception:
@@ -117,7 +118,7 @@ def meltano_state(project: Project, ctx: click.Context):
 @pass_project()
 def list_state(
     project: Project, ctx: click.Context, pattern: Optional[str]
-):  # noqa: WPS125
+):    # noqa: WPS125
     """List all state_ids for this project.
 
     Optionally pass a glob-style pattern to filter state_ids by.
@@ -125,8 +126,7 @@ def list_state(
     state_service = ctx.obj[STATE_SERVICE_KEY]
     tracker = LegacyTracker(project)
     tracker.track_meltano_state("list")
-    states = state_service.list_state(pattern)
-    if states:
+    if states := state_service.list_state(pattern):
         for state_id, state in states.items():
             if state:
                 try:
@@ -170,8 +170,8 @@ def merge_state(
     )
     tracker = LegacyTracker(project)
     tracker.track_meltano_state("merge", state_id)
-    mutually_exclusive_options = ["--input-file", "STATE", "--from-state-id"]
     if not reduce(xor, map(bool, [state, input_file, from_state_id])):
+        mutually_exclusive_options = ["--input-file", "STATE", "--from-state-id"]
         raise MutuallyExclusiveOptionsError(*mutually_exclusive_options)
     elif input_file:
         with open(input_file) as state_f:

@@ -199,8 +199,7 @@ async def _run_job(project, job, session, context_builder, force=False):
     StaleJobFailer(job.job_id).fail_stale_jobs(session)
 
     if not force:
-        existing = JobFinder(job.job_id).latest_running(session)
-        if existing:
+        if existing := JobFinder(job.job_id).latest_running(session):
             raise CliError(
                 f"Another '{job.job_id}' pipeline is already running which started at {existing.started_at}. "
                 + "To ignore this check use the '--force' option."

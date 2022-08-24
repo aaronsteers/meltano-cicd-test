@@ -81,12 +81,11 @@ def add(
 
     plugins_service = ProjectPluginsService(project)
 
-    if flags["custom"]:
-        if plugin_type in {
-            PluginType.TRANSFORMS,
-            PluginType.ORCHESTRATORS,
-        }:
-            raise CliError(f"--custom is not supported for {plugin_type}")
+    if flags["custom"] and plugin_type in {
+        PluginType.TRANSFORMS,
+        PluginType.ORCHESTRATORS,
+    }:
+        raise CliError(f"--custom is not supported for {plugin_type}")
 
     plugin_refs = [
         PluginRef(plugin_type=plugin_type, name=name) for name in plugin_names
@@ -120,12 +119,12 @@ def add(
         )
     plugins.extend(required_plugins)
 
-    success = install_plugins(project, plugins, reason=PluginInstallReason.ADD)
-
-    if not success:
+    if success := install_plugins(
+        project, plugins, reason=PluginInstallReason.ADD
+    ):
+        _print_plugins(plugins)
+    else:
         raise CliError("Failed to install plugin(s)")
-
-    _print_plugins(plugins)
 
 
 def _print_plugins(plugins):

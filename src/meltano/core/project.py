@@ -183,8 +183,7 @@ class Project(Versioned):  # noqa: WPS214
         if cls._default:
             return cls._default
 
-        project_root = project_root or os.getenv(PROJECT_ROOT_ENV)
-        if project_root:
+        if project_root := project_root or os.getenv(PROJECT_ROOT_ENV):
             project = Project(project_root)
             if not project.meltanofile.exists():
                 raise ProjectNotFound(project)

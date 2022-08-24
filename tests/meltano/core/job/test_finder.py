@@ -53,7 +53,7 @@ class TestJobFinder:
 
         assert job.is_stale() == is_stale
 
-        assert bool(job in JobFinder.all_stale(session)) == is_stale
+        assert (job in JobFinder.all_stale(session)) == is_stale
 
     def test_stale(self, session):
         job = Job(job_id="test")

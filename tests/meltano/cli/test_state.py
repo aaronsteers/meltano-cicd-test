@@ -126,9 +126,11 @@ class TestCliState:
 
     def test_merge_from_string(self, state_service, state_ids, cli_runner):
         with mock.patch("meltano.cli.state.StateService", return_value=state_service):
-            job_pairs = []
-            for idx in range(0, len(state_ids) - 1, 2):
-                job_pairs.append((state_ids[idx], state_ids[idx + 1]))
+            job_pairs = [
+                (state_ids[idx], state_ids[idx + 1])
+                for idx in range(0, len(state_ids) - 1, 2)
+            ]
+
             for (job_src, job_dst) in job_pairs:
                 job_src_state = state_service.get_state(job_src)
                 job_dst_state = state_service.get_state(job_dst)
@@ -151,9 +153,11 @@ class TestCliState:
     ):
         tmp_path = mkdtemp()
         with mock.patch("meltano.cli.state.StateService", return_value=state_service):
-            job_pairs = []
-            for idx in range(0, len(state_ids) - 1, 2):
-                job_pairs.append((state_ids[idx], state_ids[idx + 1]))
+            job_pairs = [
+                (state_ids[idx], state_ids[idx + 1])
+                for idx in range(0, len(state_ids) - 1, 2)
+            ]
+
             for (job_src, job_dst) in job_pairs:
                 job_src_state = state_service.get_state(job_src)
                 job_dst_state = state_service.get_state(job_dst)
@@ -171,9 +175,11 @@ class TestCliState:
 
     def test_merge_from_job(self, state_service, state_ids, cli_runner):
         with mock.patch("meltano.cli.state.StateService", return_value=state_service):
-            job_pairs = []
-            for idx in range(0, len(state_ids) - 1, 2):
-                job_pairs.append((state_ids[idx], state_ids[idx + 1]))
+            job_pairs = [
+                (state_ids[idx], state_ids[idx + 1])
+                for idx in range(0, len(state_ids) - 1, 2)
+            ]
+
             for (job_src, job_dst) in job_pairs:
                 job_state_src = state_service.get_state(job_src)
                 job_state_dst = state_service.get_state(job_dst)

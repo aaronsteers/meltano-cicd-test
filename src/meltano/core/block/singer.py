@@ -117,14 +117,11 @@ class InvokerBase:  # noqa: WPS230, WPS214
         if self.process_handle is None:
             return
 
-        try:
+        with suppress(ProcessLookupError):
             if kill:
                 self.process_handle.kill()
             else:
                 self.process_handle.terminate()
-        except ProcessLookupError:
-            # Process already stopped
-            pass
         await self.process_future
         if self._stdout_future is not None:
             self._stdout_future.cancel()
@@ -205,9 +202,7 @@ class InvokerBase:  # noqa: WPS230, WPS214
         Returns:
             The stdin of the underlying process.
         """
-        if self.process_handle is None:
-            return None
-        return self.process_handle.stdin
+        return None if self.process_handle is None else self.process_handle.stdin
 
     async def close_stdin(self) -> None:
         """Close the underlying process stdin if the block is a consumer."""
@@ -255,12 +250,8 @@ class InvokerBase:  # noqa: WPS230, WPS214
 
     async def post(self) -> None:
         """Post triggers resetting the underlying plugin config."""
-        try:
+        with suppress(FileNotFoundError):
             await self.invoker.cleanup()
-        except FileNotFoundError:
-            # TODO: should we preserve these on a failure ?
-            # the invoker prepared context manager was able to clean up the configs
-            pass
 
     def _merge_outputs(self, source: str, outputs: list) -> list:
         if not self.invoker.output_handlers:
@@ -340,10 +331,7 @@ class SingerBlock(InvokerBase, IOBlock):
         stream_buffer_size = self.project_settings_service.get("elt.buffer_size")
         line_length_limit = stream_buffer_size // 2
 
-        stdin = None
-        if self.consumer:
-            stdin = asyncio.subprocess.PIPE
-
+        stdin = asyncio.subprocess.PIPE if self.consumer else None
         try:
             self.process_handle = await self.invoker.invoke_async(
                 limit=line_length_limit,
@@ -363,22 +351,15 @@ class SingerBlock(InvokerBase, IOBlock):
         if self.process_handle is None:
             return
 
-        try:
+        with suppress(ProcessLookupError):
             if kill:
                 self.process_handle.kill()
             else:
                 self.process_handle.terminate()
-        except ProcessLookupError:
-            # Process already stopped
-            pass
-
         await self.process_future
         if self._stdout_future is not None:
             self._stdout_future.cancel()
         if self._stderr_future is not None:
             self._stderr_future.cancel()
-        try:
+        with suppress(FileNotFoundError):
             await self.invoker.cleanup()
-        except FileNotFoundError:
-            # the invoker prepared context manager was able to clean up the configs
-            pass

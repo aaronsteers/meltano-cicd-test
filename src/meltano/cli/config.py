@@ -91,7 +91,7 @@ def config(  # noqa: WPS231
 
         if ctx.invoked_subcommand is None:
             if config_format == "json":
-                process = extras is not True
+                process = not extras
                 json_config = settings.as_dict(
                     extras=extras, process=process, session=session
                 )
@@ -190,8 +190,7 @@ def list_settings(ctx, extras):
                 click.echo(f"{setting_def.label}: ", nl=False)
             click.echo(f"{setting_def.description}")
 
-    docs_url = settings.docs_url
-    if docs_url:
+    if docs_url := settings.docs_url:
         click.echo()
         click.echo(
             f"To learn more about {settings.label} and its settings, visit {docs_url}"

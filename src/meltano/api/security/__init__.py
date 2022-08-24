@@ -35,11 +35,6 @@ def setup_security(app, project):
         # the FreeUser is free to do everything and has all
         # roles and permissions automatically.
         options["anonymous_user"] = FreeUser
-    else:
-        # Use Flask's built-in AnonymousUser which is not deemed to be authenticated
-        # and has no roles
-        pass
-
     security.init_app(app, users, **options)
     security.unauthorized_handler(unauthorized_callback)
     user_logged_in.connect_via(app)(_user_logged_in_hook)

@@ -43,11 +43,8 @@ def remove_plugins(project, plugins):
     )
 
     click.echo()
-    fg = "green"
-    if num_removed < total:
-        fg = "yellow"
-
     if len(plugins) > 1:
+        fg = "yellow" if num_removed < total else "green"
         click.secho(f"Fully removed {num_removed}/{total} plugins", fg=fg)
         click.echo()
 
